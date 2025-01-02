@@ -1,0 +1,21 @@
+
+sudo xhost +local:root
+
+Build:
+sudo docker build  --network=host --build-arg UNAME=$USER --build-arg UID=$UID  -t ubuntu20:foundationpose .
+
+Network:
+docker network create ros2_net
+
+RUN:
+sudo docker run --runtime=nvidia -it --name foundationpose \
+-v $(pwd)/foundationpose_ws:$(pwd)/foundationpose_ws \
+-e DISPLAY -e LOCAL_USER_ID=$(id -u) --user=$(id -u) \
+-e QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+--network=ros2_net --privileged ubuntu22:foundationpose
+
+
+ros2 run foundation_pose foundation_pose_node
+
+
+ros2 pkg create foundation_pose --build-type ament_python
