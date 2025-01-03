@@ -4,7 +4,7 @@ import rclpy
 from rclpy.node import Node
 
 
-from scipy.spatial.transform import Rotation
+from scipy.spatial.transform import Rotation as R
 
 from cv_bridge import CvBridge
 
@@ -142,13 +142,13 @@ class FoundationPoseNode(Node):
     depth = CvBridge().imgmsg_to_cv2(msg, desired_encoding="64FC1")
 
     self.depth = depth
-    self.flags["depth"] = True
-    print(f"self.color and self.depth and self.cam_K::{self.color and self.depth and self.cam_K}")
-    print(f"self.color ::{self.color }")
-    print(f"self.depth ::{self.depth }")
-    print(f"self.cam_K ::{self.cam_K }")
+    print(f"self.color ::{isinstance(self.color, np.ndarray) }")
+    print(f"self.depth ::{isinstance(self.depth, np.ndarray) }")
+    print(f"self.cam_K ::{isinstance(self.cam_K, np.ndarray) }")
 
-    if self.color and self.depth and self.cam_K:
+    if isinstance(self.color, np.ndarray) and \
+       isinstance(self.depth, np.ndarray) and \
+       isinstance(self.cam_K, np.ndarray):
       self.run()
       self.depth = None
       self.color = None
@@ -158,7 +158,7 @@ class FoundationPoseNode(Node):
     self.cur_time = msg.header.stamp
     color = CvBridge().imgmsg_to_cv2(msg, desired_encoding="bgr8")
     color = cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
-    self.flags["color"] = True
+    self.color = color
 
   def on_track(self):
     print("TRACKING")
@@ -166,27 +166,34 @@ class FoundationPoseNode(Node):
     self.pose = self.est.track_one(rgb = self.color, depth = self.depth,
                                    K = self.cam_K, iteration = 2)
 
-    trans = self.pose[:3,3]
-    q_wxyz = (Rotation.from_matrix(self.pose[:3, :3])).as_quat()
 
-    print("Object in Cam - \n", self.pose, "\n\n")
 
-    transform_msg = PoseStamped()
 
-    transform_msg.header.stamp = self.cur_time
-    transform_msg.header.frame_id = "camera_color_optical_frame"
-    transform_msg.child_frame_id = "tracked_object_origin_in_cam"
+    # Convert center_pose to the pose format
+    position = self.pose[:3, 3]
+    rotation_matrix = self.pose[:3, :3]
+    quaternion = R.from_matrix(rotation_matrix).as_quat()
 
-    transform_msg.pose.position.x = trans[0]
-    transform_msg.pose.position.y = trans[1]
-    transform_msg.pose.position.z = trans[2]
+    # print(f"on_track::position::{position}")
+    # print(f"on_track::position::type::{type(position)}")
 
-    transform_msg.pose.orientation.w = q_wxyz[3]
-    transform_msg.pose.orientation.x = q_wxyz[0]
-    transform_msg.pose.orientation.y = q_wxyz[1]
-    transform_msg.pose.orientation.z = q_wxyz[2]
 
-    self.pose_publisher.publish(transform_msg)
+    pose_stamped_msg = PoseStamped()
+
+    pose_stamped_msg.header.stamp = self.cur_time
+    pose_stamped_msg.header.frame_id = "camera_color_optical_frame"
+    # pose_stamped_msg.child_frame_id = "tracked_object_origin_in_cam"
+
+    pose_stamped_msg.pose.position.x = float(position[0])
+    pose_stamped_msg.pose.position.y = float(position[1])
+    pose_stamped_msg.pose.position.z = float(position[2])
+
+    pose_stamped_msg.pose.orientation.w = quaternion[3]
+    pose_stamped_msg.pose.orientation.x = quaternion[0]
+    pose_stamped_msg.pose.orientation.y = quaternion[1]
+    pose_stamped_msg.pose.orientation.z = quaternion[2]
+
+    self.pose_publisher.publish(pose_stamped_msg)
 
 
 def main(args=None):
