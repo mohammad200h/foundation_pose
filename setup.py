@@ -57,6 +57,18 @@ setup(
           os.listdir(package_name + f'/demo_data/mustard0/masks/')
           if filename.endswith('.png')
         ]),
+         # drill mesh
+        ('lib/python3.10/site-packages/' + package_name +'/demo_data/drill/',[
+          package_name + '/demo_data/drill/drill.obj']),
+         # apple mesh
+        ('lib/python3.10/site-packages/' + package_name +'/demo_data/apple/',[
+          package_name + '/demo_data/apple/apple.obj']),
+         # tuna mesh
+        ('lib/python3.10/site-packages/' + package_name +'/demo_data/tuna/',[
+          package_name + '/demo_data/tuna/tuna.obj']),
+        # banana mesh
+        ('lib/python3.10/site-packages/' + package_name +'/demo_data/banana/',[
+          package_name + '/demo_data/banana/banana.obj']),
         # launch files
         (os.path.join('share', package_name, 'launch/'),
          glob('launch/*launch.[pxy][yma]*')
@@ -76,12 +88,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-          'foundationpose_ros_multi = foundation_pose.foundationpose_ros_multi:main',
           'foundation_pose = foundation_pose.foundation_pose_node:main',
-          # used for testing
-          'fake_realsense = foundation_pose.fake_realsense_node:main',
-
-
         ],
     },
 )
