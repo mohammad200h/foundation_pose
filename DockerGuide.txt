@@ -15,7 +15,10 @@ sudo docker run --runtime=nvidia -it --name foundationpose \
 --network=ros2_net --privileged ubuntu22:foundationpose
 
 
-ros2 run foundation_pose foundation_pose_node
+Install Extra Packages:
+install.sh
 
+
+ros2 run foundation_pose foundation_pose_node
 
 ros2 pkg create foundation_pose --build-type ament_python

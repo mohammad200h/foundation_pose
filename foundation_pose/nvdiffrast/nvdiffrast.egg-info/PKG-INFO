@@ -5,13 +5,12 @@ Summary: nvdiffrast - modular primitives for high-performance differentiable ren
 Home-page: https://github.com/NVlabs/nvdiffrast
 Author: Samuli Laine
 Author-email: slaine@nvidia.com
-License: UNKNOWN
-Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.6
 Description-Content-Type: text/markdown
 License-File: LICENSE.txt
+Requires-Dist: numpy
 
 ## Nvdiffrast &ndash; Modular Primitives for High-Performance Differentiable Rendering
 
@@ -55,5 +54,3 @@ model originally made available under
   number  = {6}
 }
 ```
-
-
